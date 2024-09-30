@@ -16,6 +16,8 @@ if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'message_counter' not in st.session_state:
     st.session_state.message_counter = 0
+if 'thinking' not in st.session_state:
+    st.session_state.thinking = False
 
 # Configuración de OpenAI
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -61,6 +63,7 @@ def interact_with_assistant(user_input):
 def clear_chat():
     st.session_state.messages = []
     st.session_state.message_counter = 0
+    st.session_state.thinking = False
 
 # Estilos CSS personalizados
 st.markdown("""
@@ -130,6 +133,11 @@ for role, content in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
 
+# Mostrar el mensaje "El asistente está pensando" y el indicador de carga
+if st.session_state.thinking:
+    with st.spinner('El asistente está pensando...'):
+        st.empty()
+
 # Área de entrada del usuario
 user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
 
@@ -149,12 +157,15 @@ with col3:
     # Botón Enviar
     if st.button('Enviar', key='enviar'):
         if user_input:
-            with st.spinner('El asistente está pensando...'):
-                response = interact_with_assistant(user_input)
-            st.session_state.messages.append(("user", user_input))
-            st.session_state.messages.append(("assistant", response))
+            st.session_state.thinking = True
             st.rerun()
-        else:
-            st.warning("Por favor, ingresa una pregunta.")
 
 st.markdown('</div>', unsafe_allow_html=True)
+
+# Procesar la respuesta del asistente
+if st.session_state.thinking and user_input:
+    response = interact_with_assistant(user_input)
+    st.session_state.messages.append(("user", user_input))
+    st.session_state.messages.append(("assistant", response))
+    st.session_state.thinking = False
+    st.rerun()
