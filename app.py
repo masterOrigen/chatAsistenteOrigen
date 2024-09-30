@@ -67,8 +67,6 @@ st.markdown("""
         align-items: flex-start;
     }
     .stChatMessage .avatar {
-        background-color: #0f52ba;
-        color: white;
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -77,6 +75,12 @@ st.markdown("""
         justify-content: center;
         margin-right: 20px;
         flex-shrink: 0;
+        overflow: hidden;
+    }
+    .stChatMessage .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     .stChatMessage .content {
         flex-grow: 1;
@@ -89,7 +93,7 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
-    welcome_message = "Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios"
+    welcome_message = "Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios."
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
@@ -98,7 +102,9 @@ for role, content in st.session_state.messages:
     if role == "assistant":
         st.markdown(f"""
         <div class="stChatMessage">
-            <div class="avatar">AI</div>
+            <div class="avatar">
+                <img src="http://brainstorm.origenmedios.cl/wp-content/uploads/2024/09/favicoBrainstormOK2.png" alt="AI Avatar">
+            </div>
             <div class="content">
                 <p>{content}</p>
             </div>
