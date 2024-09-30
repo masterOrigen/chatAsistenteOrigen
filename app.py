@@ -44,12 +44,17 @@ def interact_with_assistant(user_input):
 # Estilos CSS personalizados
 st.markdown("""
     <style>
-    .stTextArea textarea {
-        background-color: transparent;
-        border: none;
+    .user-message {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
     }
-    .stTextInput textarea {
-        height: 100px;
+    .assistant-message {
+        background-color: #e6f3ff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -66,9 +71,9 @@ if not st.session_state.messages:
 for role, content in st.session_state.messages:
     st.session_state.message_counter += 1
     if role == "user":
-        st.text_area("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True, height=100)
+        st.markdown(f'<div class="user-message">Tú: {content}</div>', unsafe_allow_html=True)
     else:
-        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True, height=200)
+        st.markdown(f'<div class="assistant-message">Asistente: {content}</div>', unsafe_allow_html=True)
 
 # Área de entrada del usuario (siempre al final)
 user_input = st.text_area("Tu pregunta sobre los archivos:", key="user_input", height=100)
