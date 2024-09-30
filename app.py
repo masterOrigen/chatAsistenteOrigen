@@ -90,21 +90,14 @@ st.markdown("""
     .stChatMessage .content {
         flex-grow: 1;
     }
-    .input-container {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    .input-area {
-        flex-grow: 1;
-    }
     .button-container {
         display: flex;
-        flex-direction: column;
+        justify-content: flex-end;
         gap: 10px;
+        margin-top: 10px;
     }
     .stButton > button {
-        width: 100%;
+        width: auto;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -141,18 +134,16 @@ for role, content in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
 
-# Área de entrada del usuario y botones
-st.markdown('<div class="input-container">', unsafe_allow_html=True)
+# Área de entrada del usuario
+user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
 
-# Columna para el área de texto
-col1, col2 = st.columns([5,1])
+# Contenedor para los botones
+st.markdown('<div class="button-container">', unsafe_allow_html=True)
 
-with col1:
-    user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
+# Columnas para los botones
+col1, col2, col3 = st.columns([6, 1, 1])
 
 with col2:
-    st.markdown('<div class="button-container">', unsafe_allow_html=True)
-    
     # Botón Enviar
     if st.button('Enviar'):
         if user_input:
@@ -164,11 +155,10 @@ with col2:
         else:
             st.warning("Por favor, ingresa una pregunta.")
 
+with col3:
     # Botón Limpiar
     if st.button('Limpiar'):
         clear_chat()
         st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
