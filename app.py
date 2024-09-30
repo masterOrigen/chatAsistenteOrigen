@@ -44,17 +44,35 @@ def interact_with_assistant(user_input):
 # Estilos CSS personalizados
 st.markdown("""
     <style>
-    .user-message {
-        background-color: #f0f0f0;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 10px;
+    .stChatMessage {
+        background-color: #f0f2f6;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
     }
-    .assistant-message {
-        background-color: #e6f3ff;
-        padding: 10px;
+    .stChatMessage .avatar {
+        background-color: #0f52ba;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        flex-shrink: 0;
+    }
+    .stChatMessage .content {
+        flex-grow: 1;
+    }
+    .user-input {
+        background-color: white;
+        border: 1px solid #ddd;
         border-radius: 5px;
-        margin-bottom: 10px;
+        padding: 10px;
+        margin-top: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -70,10 +88,24 @@ if not st.session_state.messages:
 # Mostrar el historial de mensajes
 for role, content in st.session_state.messages:
     st.session_state.message_counter += 1
-    if role == "user":
-        st.markdown(f'<div class="user-message">Tú: {content}</div>', unsafe_allow_html=True)
+    if role == "assistant":
+        st.markdown(f"""
+        <div class="stChatMessage">
+            <div class="avatar">AI</div>
+            <div class="content">
+                <p>{content}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="assistant-message">Asistente: {content}</div>', unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="stChatMessage">
+            <div class="avatar">Tú</div>
+            <div class="content">
+                <p>{content}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Área de entrada del usuario (siempre al final)
 user_input = st.text_area("Tu pregunta sobre los archivos:", key="user_input", height=100)
