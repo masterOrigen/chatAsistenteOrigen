@@ -140,8 +140,12 @@ function sendMessage() {
     const input = document.getElementById('user-input');
     const message = input.value;
     if (message) {
+        const hiddenInput = parent.document.querySelector('.stTextInput input');
+        hiddenInput.value = message;
+        hiddenInput.dispatchEvent(new Event('input'));
         const submitButton = parent.document.querySelector('button.stButton');
         submitButton.click();
+        input.value = '';
     }
 }
 </script>
@@ -150,7 +154,7 @@ function sendMessage() {
 user_input = st.text_input("Hidden input for Streamlit", key="hidden_input", label_visibility="hidden")
 
 # Lógica para enviar la pregunta
-if st.button('Send', key='send_button', style="display:none;"):
+if st.button('Send', key='send_button'):
     if user_input:
         with st.spinner('El asistente está pensando...'):
             response = interact_with_assistant(user_input)
