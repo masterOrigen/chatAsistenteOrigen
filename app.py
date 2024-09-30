@@ -24,7 +24,7 @@ assistant_id = os.getenv('ASSISTANT_ID')
 
 # Configuración de la Vector Store
 embeddings = OpenAIEmbeddings()
-vector_store = FAISS.load_local("vs_VEqqVkUfZfFXnK0ALwzbTujp", embeddings)
+vector_store = FAISS.load_local("vs_VEqqVkUfZfFXnK0ALwzbTujp", embeddings, allow_dangerous_deserialization=True)
 
 # Función para interactuar con el asistente
 def interact_with_assistant(user_input):
