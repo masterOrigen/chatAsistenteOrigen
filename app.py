@@ -57,6 +57,11 @@ def interact_with_assistant(user_input):
     except Exception as e:
         return f"Error: {str(e)}"
 
+# Función para limpiar el chat
+def clear_chat():
+    st.session_state.messages = []
+    st.session_state.message_counter = 0
+
 # Estilos CSS personalizados
 st.markdown("""
     <style>
@@ -85,10 +90,14 @@ st.markdown("""
     .stChatMessage .content {
         flex-grow: 1;
     }
+    .stButton {
+        margin-right: 10px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 # Interfaz de usuario de Streamlit
+st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
@@ -119,14 +128,20 @@ for role, content in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
 
-# Área de entrada del usuario y botón de envío
+# Área de entrada del usuario y botones
 user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
-if st.button('Enviar'):
-    if user_input:
-        with st.spinner('El asistente está pensando...'):
-            response = interact_with_assistant(user_input)
-        st.session_state.messages.append(("user", user_input))
-        st.session_state.messages.append(("assistant", response))
+col1, col2 = st.columns([1,6])
+with col1:
+    if st.button('Enviar'):
+        if user_input:
+            with st.spinner('El asistente está pensando...'):
+                response = interact_with_assistant(user_input)
+            st.session_state.messages.append(("user", user_input))
+            st.session_state.messages.append(("assistant", response))
+            st.rerun()
+        else:
+            st.warning("Por favor, ingresa una pregunta.")
+with col2:
+    if st.button('Limpiar'):
+        clear_chat()
         st.rerun()
-    else:
-        st.warning("Por favor, ingresa una pregunta.")
