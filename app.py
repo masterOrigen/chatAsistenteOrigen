@@ -81,21 +81,6 @@ st.markdown("""
     .stChatMessage .content {
         flex-grow: 1;
     }
-    .stTextArea {
-        position: relative;
-    }
-    .stTextArea textarea {
-        padding-right: 40px;
-    }
-    .send-button {
-        position: absolute;
-        right: 10px;
-        bottom: 10px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 24px;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -104,7 +89,7 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
-    welcome_message = interact_with_assistant("Saluda brevemente y menciona que tienes acceso a una base de conocimiento específica (vs_VEqqVkUfZfFXnK0ALwzbTujp). Luego, di 'Estos son algunos de los archivos en mi base de conocimiento:' y lista SOLO algunos de los archivos que realmente están en esta base de vectores, sin inventar ninguno.")
+    welcome_message = "Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios"
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
@@ -129,19 +114,9 @@ for role, content in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
 
-# Área de entrada del usuario con botón de envío integrado
-col1, col2 = st.columns([6,1])
-with col1:
-    user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
-with col2:
-    st.markdown("""
-    <div style="height: 100px; display: flex; align-items: flex-end;">
-        <button class="send-button" onclick="document.querySelector('.stButton button').click()">➤</button>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Lógica para enviar la pregunta
-if st.button('Send', key='send_button'):
+# Área de entrada del usuario y botón de envío
+user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
+if st.button('Enviar'):
     if user_input:
         with st.spinner('El asistente está pensando...'):
             response = interact_with_assistant(user_input)
