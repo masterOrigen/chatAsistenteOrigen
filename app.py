@@ -3,6 +3,8 @@ from openai import OpenAI
 import time
 from dotenv import load_dotenv
 import os
+from langchain.vectorstores import VectorStore
+from langchain.embeddings import OpenAIEmbeddings
 
 # Cargar variables de entorno
 load_dotenv()
@@ -20,14 +22,23 @@ if 'message_counter' not in st.session_state:
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 assistant_id = os.getenv('ASSISTANT_ID')
 
+# Configuración de la Vector Store
+embeddings = OpenAIEmbeddings()
+vector_store = VectorStore.from_existing_index(embeddings, index_name="vs_VEqqVkUfZfFXnK0ALwzbTujp")
+
 # Función para interactuar con el asistente
 def interact_with_assistant(user_input):
     try:
+        # Buscar información relevante en la vector store
+        relevant_docs = vector_store.similarity_search(user_input, k=3)
+        context = "\n".join([doc.page_content for doc in relevant_docs])
+
+        # Crear un nuevo hilo con el contexto y la pregunta del usuario
         thread = client.beta.threads.create()
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=user_input
+            content=f"Contexto: {context}\n\nPregunta del usuario: {user_input}"
         )
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -79,7 +90,9 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida y lista de archivos
 if not st.session_state.messages:
-    welcome_message = interact_with_assistant("Saluda de esta manera exacta: 'Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios' y luego proporciona la LISTA COMPLETA DE LOS ARCHIVOS QUE TIENES EN TU BASE DE CONOCIMIENTO. Es obligatorio listar todos los archivos sin excepción.")
+    welcome_message = "Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios. Aquí está la lista completa de archivos en mi base de conocimiento:"
+    file_list = vector_store.get_all_documents()  # Asumiendo que existe este método
+    welcome_message += "\n" + "\n".join([doc.metadata['source'] for doc in file_list])
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
