@@ -3,8 +3,8 @@ from openai import OpenAI
 import time
 from dotenv import load_dotenv
 import os
-from langchain.vectorstores import VectorStore
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 
 # Cargar variables de entorno
 load_dotenv()
@@ -24,7 +24,7 @@ assistant_id = os.getenv('ASSISTANT_ID')
 
 # Configuración de la Vector Store
 embeddings = OpenAIEmbeddings()
-vector_store = VectorStore.from_existing_index(embeddings, index_name="vs_VEqqVkUfZfFXnK0ALwzbTujp")
+vector_store = FAISS.load_local("vs_VEqqVkUfZfFXnK0ALwzbTujp", embeddings)
 
 # Función para interactuar con el asistente
 def interact_with_assistant(user_input):
@@ -91,8 +91,8 @@ st.title("Asistente AI")
 # Mensaje de bienvenida y lista de archivos
 if not st.session_state.messages:
     welcome_message = "Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios. Aquí está la lista completa de archivos en mi base de conocimiento:"
-    file_list = vector_store.get_all_documents()  # Asumiendo que existe este método
-    welcome_message += "\n" + "\n".join([doc.metadata['source'] for doc in file_list])
+    file_list = vector_store.index_to_docstore_id.values()
+    welcome_message += "\n" + "\n".join(file_list)
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
