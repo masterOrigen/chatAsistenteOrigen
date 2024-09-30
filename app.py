@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 # Configuración de la página
-st.set_page_config(page_title="Asistente AI", page_icon="🤖")
+st.set_page_config(page_title="Asistente AI", page_icon="🤖", layout="wide")
 
 # Inicialización de la sesión de estado
 if 'messages' not in st.session_state:
@@ -23,41 +23,42 @@ assistant_id = os.getenv('ASSISTANT_ID')
 # Función para interactuar con el asistente
 def interact_with_assistant(user_input):
     try:
-        # Crear un nuevo hilo
         thread = client.beta.threads.create()
-
-        # Añadir el mensaje del usuario al hilo
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
             content=user_input
         )
-
-        # Ejecutar el asistente
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant_id
         )
-
-        # Esperar a que el asistente complete la tarea
         while run.status != 'completed':
             time.sleep(1)
             run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-
-        # Obtener la respuesta del asistente
         messages = client.beta.threads.messages.list(thread_id=thread.id)
-        assistant_message = messages.data[0].content[0].text.value
-
-        return assistant_message
-
+        return messages.data[0].content[0].text.value
     except Exception as e:
         return f"Error: {str(e)}"
 
 # Interfaz de usuario de Streamlit
 st.title("Asistente AI")
 
-# Área de entrada del usuario
-user_input = st.text_input("Tu pregunta:", key="user_input")
+# Mensaje de bienvenida y lista de archivos
+if not st.session_state.messages:
+    welcome_message = interact_with_assistant("Saluda y proporciona la lista de archivos en tu base de conocimiento.")
+    st.session_state.messages.append(("assistant", welcome_message))
+
+# Mostrar el historial de mensajes
+for role, content in st.session_state.messages:
+    st.session_state.message_counter += 1
+    if role == "user":
+        st.text_input("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True)
+    else:
+        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True, height=150)
+
+# Área de entrada del usuario (siempre al final)
+user_input = st.text_input("Tu pregunta sobre los archivos:", key="user_input")
 
 # Botón para enviar la pregunta
 if st.button("Enviar"):
@@ -66,13 +67,6 @@ if st.button("Enviar"):
             response = interact_with_assistant(user_input)
         st.session_state.messages.append(("user", user_input))
         st.session_state.messages.append(("assistant", response))
+        st.experimental_rerun()
     else:
         st.warning("Por favor, ingresa una pregunta.")
-
-# Mostrar el historial de mensajes
-for role, content in st.session_state.messages:
-    st.session_state.message_counter += 1
-    if role == "user":
-        st.text_input("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True)
-    else:
-        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True)
