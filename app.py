@@ -3,6 +3,7 @@ from openai import OpenAI
 import time
 from dotenv import load_dotenv
 import os
+import re
 
 # Cargar variables de entorno
 load_dotenv()
@@ -46,7 +47,12 @@ def interact_with_assistant(user_input):
             run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
         
         messages = client.beta.threads.messages.list(thread_id=thread.id)
-        return messages.data[0].content[0].text.value
+        response = messages.data[0].content[0].text.value
+        
+        # Eliminar el texto "【4:0†source】" de la respuesta
+        response = re.sub(r'【\d+:\d+†source】', '', response)
+        
+        return response.strip()
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -75,17 +81,16 @@ st.markdown("""
         flex-grow: 1;
     }
     .user-input-container {
-        display: flex;
-        align-items: center;
+        position: relative;
     }
     .user-input {
-        flex-grow: 1;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 10px;
-        margin-right: 10px;
+        width: 100%;
+        padding-right: 40px;
     }
     .send-button {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
         background: none;
         border: none;
         cursor: pointer;
@@ -125,18 +130,32 @@ for role, content in st.session_state.messages:
         """, unsafe_allow_html=True)
 
 # Área de entrada del usuario con botón de envío integrado
-col1, col2 = st.columns([6,1])
-with col1:
-    user_input = st.text_area("Tu pregunta:", key="user_input", height=100)
-with col2:
-    send_button = st.button("➤")
+st.markdown("""
+<div class="user-input-container">
+    <textarea id="user-input" class="user-input" style="height: 100px;"></textarea>
+    <button class="send-button" onclick="sendMessage()">➤</button>
+</div>
+<script>
+function sendMessage() {
+    const input = document.getElementById('user-input');
+    const message = input.value;
+    if (message) {
+        const submitButton = parent.document.querySelector('button.stButton');
+        submitButton.click();
+    }
+}
+</script>
+""", unsafe_allow_html=True)
+
+user_input = st.text_input("Hidden input for Streamlit", key="hidden_input", label_visibility="hidden")
 
 # Lógica para enviar la pregunta
-if send_button and user_input:
-    with st.spinner('El asistente está pensando...'):
-        response = interact_with_assistant(user_input)
-    st.session_state.messages.append(("user", user_input))
-    st.session_state.messages.append(("assistant", response))
-    st.rerun()
-elif send_button:
-    st.warning("Por favor, ingresa una pregunta.")
+if st.button('Send', key='send_button', style="display:none;"):
+    if user_input:
+        with st.spinner('El asistente está pensando...'):
+            response = interact_with_assistant(user_input)
+        st.session_state.messages.append(("user", user_input))
+        st.session_state.messages.append(("assistant", response))
+        st.rerun()
+    else:
+        st.warning("Por favor, ingresa una pregunta.")
