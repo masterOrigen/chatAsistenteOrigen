@@ -23,10 +23,8 @@ assistant_id = os.getenv('ASSISTANT_ID')
 # Función para interactuar con el asistente
 def interact_with_assistant(user_input):
     try:
-        # Crear un nuevo hilo con la pregunta del usuario
         thread = client.beta.threads.create()
         
-        # Añadir instrucciones para respuestas detalladas y precisas
         instruction = ("Por favor, proporciona una respuesta lo más extensa y detallada posible. "
                        "Asegúrate de que la información sea precisa y basada en hechos. "
                        "Si es relevante, incluye ejemplos o datos específicos de los documentos en tu base de conocimiento. "
@@ -76,11 +74,22 @@ st.markdown("""
     .stChatMessage .content {
         flex-grow: 1;
     }
+    .user-input-container {
+        display: flex;
+        align-items: center;
+    }
     .user-input {
+        flex-grow: 1;
         border: 1px solid #ddd;
         border-radius: 5px;
         padding: 10px;
-        margin-top: 20px;
+        margin-right: 10px;
+    }
+    .send-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -90,7 +99,7 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
-    welcome_message = interact_with_assistant("Saluda brevemente y proporciona la lista completa de los archivos que tienes en tu base de conocimiento. Es obligatorio listar todos los archivos sin excepción.")
+    welcome_message = interact_with_assistant("Saluda brevemente y menciona que tienes acceso a una base de conocimiento. Luego, di 'Estos son algunos de los archivos en mi base de conocimiento:' y lista SOLO algunos de los archivos que realmente están en tu base de vectores, sin inventar ninguno.")
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
@@ -115,16 +124,19 @@ for role, content in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
 
-# Área de entrada del usuario (siempre al final)
-user_input = st.text_area("Tu pregunta sobre los archivos:", key="user_input", height=100)
+# Área de entrada del usuario con botón de envío integrado
+col1, col2 = st.columns([6,1])
+with col1:
+    user_input = st.text_area("Tu pregunta:", key="user_input", height=100)
+with col2:
+    send_button = st.button("➤")
 
-# Botón para enviar la pregunta
-if st.button("Enviar"):
-    if user_input:
-        with st.spinner('El asistente está pensando...'):
-            response = interact_with_assistant(user_input)
-        st.session_state.messages.append(("user", user_input))
-        st.session_state.messages.append(("assistant", response))
-        st.rerun()
-    else:
-        st.warning("Por favor, ingresa una pregunta.")
+# Lógica para enviar la pregunta
+if send_button and user_input:
+    with st.spinner('El asistente está pensando...'):
+        response = interact_with_assistant(user_input)
+    st.session_state.messages.append(("user", user_input))
+    st.session_state.messages.append(("assistant", response))
+    st.rerun()
+elif send_button:
+    st.warning("Por favor, ingresa una pregunta.")
