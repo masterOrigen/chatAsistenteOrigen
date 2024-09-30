@@ -89,7 +89,6 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Interfaz de usuario de Streamlit
-st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
