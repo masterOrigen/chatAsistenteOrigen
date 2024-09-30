@@ -59,7 +59,7 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida y lista de archivos
 if not st.session_state.messages:
-    welcome_message = interact_with_assistant("Saluda y proporciona la lista de archivos en tu base de conocimiento.")
+    welcome_message = interact_with_assistant("Saluda de esta manera exacta: 'Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios' y luego proporciona la LISTA COMPLETA DE LOS ARCHIVOS QUE TIENES EN TU BASE DE CONOCIMIENTO. Es obligatorio listar todos los archivos sin excepción.")
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
