@@ -3,8 +3,6 @@ from openai import OpenAI
 import time
 from dotenv import load_dotenv
 import os
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
 
 # Cargar variables de entorno
 load_dotenv()
@@ -22,31 +20,15 @@ if 'message_counter' not in st.session_state:
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 assistant_id = os.getenv('ASSISTANT_ID')
 
-# Configuración de la Vector Store
-embeddings = OpenAIEmbeddings()
-vector_store = None
-try:
-    vector_store = FAISS.load_local("vs_VEqqVkUfZfFXnK0ALwzbTujp", embeddings, allow_dangerous_deserialization=True)
-except RuntimeError as e:
-    st.error(f"Error al cargar la vector store: {str(e)}")
-    st.error("Por favor, verifica que el directorio de la vector store existe y contiene los archivos necesarios.")
-
 # Función para interactuar con el asistente
 def interact_with_assistant(user_input):
     try:
-        if vector_store is None:
-            return "Lo siento, no puedo acceder a la base de conocimiento en este momento. Por favor, contacta al administrador del sistema."
-
-        # Buscar información relevante en la vector store
-        relevant_docs = vector_store.similarity_search(user_input, k=3)
-        context = "\n".join([doc.page_content for doc in relevant_docs])
-
-        # Crear un nuevo hilo con el contexto y la pregunta del usuario
+        # Crear un nuevo hilo con la pregunta del usuario
         thread = client.beta.threads.create()
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=f"Contexto: {context}\n\nPregunta del usuario: {user_input}"
+            content=user_input
         )
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -96,14 +78,9 @@ st.markdown("""
 # Interfaz de usuario de Streamlit
 st.title("Asistente AI")
 
-# Mensaje de bienvenida y lista de archivos
+# Mensaje de bienvenida
 if not st.session_state.messages:
-    if vector_store is not None:
-        welcome_message = "Bienvenido, cuéntame que información necesitas para tu estrategia y buscaré en mi base de datos la mejor selección en diversos estudios. Aquí está la lista completa de archivos en mi base de conocimiento:"
-        file_list = vector_store.index_to_docstore_id.values()
-        welcome_message += "\n" + "\n".join(file_list)
-    else:
-        welcome_message = "Bienvenido. Lamento informarte que en este momento no puedo acceder a la base de conocimiento. Por favor, intenta más tarde o contacta al administrador del sistema."
+    welcome_message = interact_with_assistant("Saluda y proporciona la lista completa de los archivos que tienes en tu base de conocimiento. Es obligatorio listar todos los archivos sin excepción.")
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
