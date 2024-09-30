@@ -25,18 +25,28 @@ def interact_with_assistant(user_input):
     try:
         # Crear un nuevo hilo con la pregunta del usuario
         thread = client.beta.threads.create()
+        
+        # Añadir instrucciones para respuestas detalladas y precisas
+        instruction = ("Por favor, proporciona una respuesta lo más extensa y detallada posible. "
+                       "Asegúrate de que la información sea precisa y basada en hechos. "
+                       "Si es relevante, incluye ejemplos o datos específicos de los documentos en tu base de conocimiento. "
+                       "Si hay múltiples aspectos en la pregunta, abórdalos todos de manera exhaustiva.")
+        
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=user_input
+            content=f"{instruction}\n\nPregunta del usuario: {user_input}"
         )
+        
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant_id
         )
+        
         while run.status != 'completed':
             time.sleep(1)
             run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+        
         messages = client.beta.threads.messages.list(thread_id=thread.id)
         return messages.data[0].content[0].text.value
     except Exception as e:
@@ -80,7 +90,7 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
-    welcome_message = interact_with_assistant("Saluda y proporciona la lista completa de los archivos que tienes en tu base de conocimiento. Es obligatorio listar todos los archivos sin excepción.")
+    welcome_message = interact_with_assistant("Saluda brevemente y proporciona la lista completa de los archivos que tienes en tu base de conocimiento. Es obligatorio listar todos los archivos sin excepción.")
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
