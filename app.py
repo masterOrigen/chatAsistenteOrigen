@@ -41,6 +41,19 @@ def interact_with_assistant(user_input):
     except Exception as e:
         return f"Error: {str(e)}"
 
+# Estilos CSS personalizados
+st.markdown("""
+    <style>
+    .stTextArea textarea {
+        background-color: transparent;
+        border: none;
+    }
+    .stTextInput textarea {
+        height: 100px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Interfaz de usuario de Streamlit
 st.title("Asistente AI")
 
@@ -53,12 +66,12 @@ if not st.session_state.messages:
 for role, content in st.session_state.messages:
     st.session_state.message_counter += 1
     if role == "user":
-        st.text_input("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True)
+        st.text_area("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True, height=100)
     else:
-        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True, height=150)
+        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True, height=auto)
 
 # Área de entrada del usuario (siempre al final)
-user_input = st.text_input("Tu pregunta sobre los archivos:", key="user_input")
+user_input = st.text_area("Tu pregunta sobre los archivos:", key="user_input", height=100)
 
 # Botón para enviar la pregunta
 if st.button("Enviar"):
