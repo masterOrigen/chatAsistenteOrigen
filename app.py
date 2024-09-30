@@ -90,14 +90,16 @@ st.markdown("""
     .stChatMessage .content {
         flex-grow: 1;
     }
-    .button-container {
+    .input-container {
         display: flex;
-        justify-content: flex-end;
+        align-items: flex-start;
         gap: 10px;
-        margin-top: 10px;
+    }
+    .input-area {
+        flex-grow: 1;
     }
     .stButton > button {
-        width: auto;
+        height: 100px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -134,18 +136,24 @@ for role, content in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
 
-# Área de entrada del usuario
-user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
+# Área de entrada del usuario y botones
+st.markdown('<div class="input-container">', unsafe_allow_html=True)
 
-# Contenedor para los botones
-st.markdown('<div class="button-container">', unsafe_allow_html=True)
+# Columnas para los botones y el área de texto
+col1, col2, col3 = st.columns([1, 10, 1])
 
-# Columnas para los botones
-col1, col2, col3 = st.columns([6, 1, 1])
+with col1:
+    # Botón Limpiar
+    if st.button('Limpiar', key='limpiar'):
+        clear_chat()
+        st.rerun()
 
 with col2:
+    user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
+
+with col3:
     # Botón Enviar
-    if st.button('Enviar'):
+    if st.button('Enviar', key='enviar'):
         if user_input:
             with st.spinner('El asistente está pensando...'):
                 response = interact_with_assistant(user_input)
@@ -154,11 +162,5 @@ with col2:
             st.rerun()
         else:
             st.warning("Por favor, ingresa una pregunta.")
-
-with col3:
-    # Botón Limpiar
-    if st.button('Limpiar'):
-        clear_chat()
-        st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
