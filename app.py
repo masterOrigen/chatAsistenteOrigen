@@ -80,6 +80,6 @@ if st.button("Enviar"):
             response = interact_with_assistant(user_input)
         st.session_state.messages.append(("user", user_input))
         st.session_state.messages.append(("assistant", response))
-        st.experimental_rerun()
+        st.rerun()
     else:
         st.warning("Por favor, ingresa una pregunta.")
