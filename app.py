@@ -27,8 +27,9 @@ def interact_with_assistant(user_input):
         thread = client.beta.threads.create()
         
         instruction = ("Por favor, proporciona una respuesta lo más extensa y detallada posible. "
-                       "Asegúrate de que la información sea precisa y basada en hechos. "
-                       "Si es relevante, incluye ejemplos o datos específicos de los documentos en tu base de conocimiento. "
+                       "Asegúrate de que la información sea precisa y basada únicamente en los datos de la base de vectores vs_VEqqVkUfZfFXnK0ALwzbTujp. "
+                       "No uses información de ninguna otra fuente. "
+                       "Si es relevante, incluye ejemplos o datos específicos de los documentos en esta base de conocimiento. "
                        "Si hay múltiples aspectos en la pregunta, abórdalos todos de manera exhaustiva.")
         
         client.beta.threads.messages.create(
@@ -80,11 +81,10 @@ st.markdown("""
     .stChatMessage .content {
         flex-grow: 1;
     }
-    .user-input-container {
+    .stTextArea {
         position: relative;
     }
-    .user-input {
-        width: 100%;
+    .stTextArea textarea {
         padding-right: 40px;
     }
     .send-button {
@@ -104,7 +104,7 @@ st.title("Asistente AI")
 
 # Mensaje de bienvenida
 if not st.session_state.messages:
-    welcome_message = interact_with_assistant("Saluda brevemente y menciona que tienes acceso a una base de conocimiento. Luego, di 'Estos son algunos de los archivos en mi base de conocimiento:' y lista SOLO algunos de los archivos que realmente están en tu base de vectores, sin inventar ninguno.")
+    welcome_message = interact_with_assistant("Saluda brevemente y menciona que tienes acceso a una base de conocimiento específica (vs_VEqqVkUfZfFXnK0ALwzbTujp). Luego, di 'Estos son algunos de los archivos en mi base de conocimiento:' y lista SOLO algunos de los archivos que realmente están en esta base de vectores, sin inventar ninguno.")
     st.session_state.messages.append(("assistant", welcome_message))
 
 # Mostrar el historial de mensajes
@@ -130,28 +130,15 @@ for role, content in st.session_state.messages:
         """, unsafe_allow_html=True)
 
 # Área de entrada del usuario con botón de envío integrado
-st.markdown("""
-<div class="user-input-container">
-    <textarea id="user-input" class="user-input" style="height: 100px;"></textarea>
-    <button class="send-button" onclick="sendMessage()">➤</button>
-</div>
-<script>
-function sendMessage() {
-    const input = document.getElementById('user-input');
-    const message = input.value;
-    if (message) {
-        const hiddenInput = parent.document.querySelector('.stTextInput input');
-        hiddenInput.value = message;
-        hiddenInput.dispatchEvent(new Event('input'));
-        const submitButton = parent.document.querySelector('button.stButton');
-        submitButton.click();
-        input.value = '';
-    }
-}
-</script>
-""", unsafe_allow_html=True)
-
-user_input = st.text_input("Hidden input for Streamlit", key="hidden_input", label_visibility="hidden")
+col1, col2 = st.columns([6,1])
+with col1:
+    user_input = st.text_area("Tu pregunta:", key="text_input_1", height=100)
+with col2:
+    st.markdown("""
+    <div style="height: 100px; display: flex; align-items: flex-end;">
+        <button class="send-button" onclick="document.querySelector('.stButton button').click()">➤</button>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Lógica para enviar la pregunta
 if st.button('Send', key='send_button'):
