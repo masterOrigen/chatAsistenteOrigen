@@ -13,6 +13,8 @@ st.set_page_config(page_title="Asistente AI", page_icon="🤖")
 # Inicialización de la sesión de estado
 if 'messages' not in st.session_state:
     st.session_state.messages = []
+if 'message_counter' not in st.session_state:
+    st.session_state.message_counter = 0
 
 # Configuración de OpenAI
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -69,7 +71,8 @@ if st.button("Enviar"):
 
 # Mostrar el historial de mensajes
 for role, content in st.session_state.messages:
+    st.session_state.message_counter += 1
     if role == "user":
-        st.text_input("Tú:", value=content, key=f"user_{len(st.session_state.messages)}", disabled=True)
+        st.text_input("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True)
     else:
-        st.text_area("Asistente:", value=content, key=f"assistant_{len(st.session_state.messages)}", disabled=True)
+        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True)
