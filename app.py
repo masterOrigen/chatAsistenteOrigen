@@ -45,9 +45,7 @@ def interact_with_assistant(user_input):
 st.markdown("""
     <style>
     .stChatMessage {
-        background-color: #f0f2f6;
         padding: 20px;
-        border-radius: 10px;
         margin-bottom: 20px;
         display: flex;
         align-items: flex-start;
@@ -68,7 +66,6 @@ st.markdown("""
         flex-grow: 1;
     }
     .user-input {
-        background-color: white;
         border: 1px solid #ddd;
         border-radius: 5px;
         padding: 10px;
