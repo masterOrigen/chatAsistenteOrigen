@@ -68,7 +68,7 @@ for role, content in st.session_state.messages:
     if role == "user":
         st.text_area("Tú:", value=content, key=f"user_{st.session_state.message_counter}", disabled=True, height=100)
     else:
-        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True, height=auto)
+        st.text_area("Asistente:", value=content, key=f"assistant_{st.session_state.message_counter}", disabled=True, height=200)
 
 # Área de entrada del usuario (siempre al final)
 user_input = st.text_area("Tu pregunta sobre los archivos:", key="user_input", height=100)
